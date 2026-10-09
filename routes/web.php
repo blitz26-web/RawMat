@@ -16,4 +16,5 @@ Route::prefix('batches')->name('batches.')->group(function () {
     Route::post('/{batch}/start', [ProductionBatchController::class, 'start'])->name('start');
     Route::post('/{batch}/complete', [ProductionBatchController::class, 'complete'])->name('complete');
     Route::get('/products/{product}/bom', [ProductController::class, 'getBom'])->name('products.bom');
+    Route::patch('/batches/{batch}/status', [ProductionBatchController::class, 'updateStatus'])->name('batches.update-status');
 });

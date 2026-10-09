@@ -72,9 +72,59 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('batches.show', $batch->id) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-eye me-1"></i> Detail
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ route('batches.show', $batch->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i> Detail
+                                    </a>
+
+                                    {{-- Tombol Pemicu Modal & Modal Form Penyelesaian Batch --}}
+                                    @if($batch->status !== 'completed' && $batch->status !== 'cancelled')
+                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#completeModal-{{ $batch->id }}">
+                                            <i class="bi bi-check-circle me-1"></i> Selesaikan
+                                        </button>
+
+                                        <div class="modal fade" id="completeModal-{{ $batch->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form action="{{ route('batches.update-status', $batch->id) }}" method="POST">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <input type="hidden" name="status" value="completed">
+
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title fw-bold">Penyelesaian Batch #{{ $batch->batch_number }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body text-start">
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-semibold">Produk Jadi Aktual (Qty)</label>
+                                                                <input type="number" step="0.01" name="actual_qty" class="form-control" value="{{ $batch->target_qty }}" required>
+                                                            </div>
+                                                            <div class="row g-2 mb-3">
+                                                                <div class="col-6">
+                                                                    <label class="form-label text-muted small">Normal Waste (Sisa Standar)</label>
+                                                                    <input type="number" step="0.01" name="normal_waste_qty" class="form-control" value="0">
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <label class="form-label text-danger small">Abnormal Waste (Cacat/Spoilage)</label>
+                                                                    <input type="number" step="0.01" name="abnormal_waste_qty" class="form-control" value="0">
+                                                                </div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-muted small">Catatan Limbah / Penyebab Cacat</label>
+                                                                <textarea name="waste_notes" class="form-control" rows="2" placeholder="Contoh: Suhu mesin terlalu tinggi di awal batch..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-success">Simpan & Potong Stok</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

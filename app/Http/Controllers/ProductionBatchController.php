@@ -6,10 +6,11 @@ use App\Http\Requests\CompleteBatchRequest;
 use App\Http\Requests\StoreBatchRequest;
 use App\Models\Material;
 use App\Models\ProductionBatch;
+use App\Models\Product;
 use App\Services\ProductionBatchService;
 use Exception;
 use Illuminate\Http\Request;
-use App\Models\Product; 
+use Illuminate\Support\Facades\DB;
 
 class ProductionBatchController extends Controller
 {
@@ -19,6 +20,62 @@ class ProductionBatchController extends Controller
     {
         $this->batchService = $batchService;
     }
+
+    public function updateStatus(Request $request, ProductionBatch $batch)
+{
+    $request->validate([
+        'status'             => 'required|in:draft,in_progress,completed,cancelled',
+        'actual_qty'         => 'nullable|numeric|min:0',
+        'normal_waste_qty'   => 'nullable|numeric|min:0',
+        'abnormal_waste_qty' => 'nullable|numeric|min:0',
+        'waste_notes'        => 'nullable|string',
+    ]);
+
+    try {
+        DB::transaction(function () use ($batch, $request) {
+            if ($request->status === 'completed' && $batch->status !== 'completed') {
+                $totalWasteCost = 0;
+
+                // 1. Potong Stok Bahan Baku
+                foreach ($batch->materials as $item) {
+                    $material = Material::lockForUpdate()->findOrFail($item->material_id);
+
+                    if ($material->current_stock < $item->qty_planned) {
+                        throw new \Exception("Stok '{$material->name}' kurang! Sisa: {$material->current_stock}, butuh: {$item->qty_planned}");
+                    }
+
+                    $material->decrement('current_stock', $item->qty_planned);
+
+                    // Estimasi biaya limbah per unit bahan baku (jika ada unit_price di model Material)
+                    $unitPrice = $material->unit_price ?? 0;
+                    $totalWasteQty = ($request->normal_waste_qty ?? 0) + ($request->abnormal_waste_qty ?? 0);
+                    $totalWasteCost += ($totalWasteQty * $unitPrice);
+                }
+
+                // 2. Hitung Yield Rate
+                $actualQty = $request->actual_qty ?? $batch->target_qty;
+                $yieldRate = ($batch->target_qty > 0) ? ($actualQty / $batch->target_qty) * 100 : 0;
+
+                // 3. Update Batch dengan Data Limbah
+                $batch->update([
+                    'status'             => 'completed',
+                    'actual_qty'         => $actualQty,
+                    'yield_rate'         => $yieldRate,
+                    'normal_waste_qty'   => $request->normal_waste_qty ?? 0,
+                    'abnormal_waste_qty' => $request->abnormal_waste_qty ?? 0,
+                    'waste_cost'         => $totalWasteCost,
+                    'waste_notes'        => $request->waste_notes,
+                ]);
+            } else {
+                $batch->update(['status' => $request->status]);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Status batch & pencatatan limbah berhasil diperbarui!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', $e->getMessage());
+    }
+}
 
     public function index(Request $request)
     {
@@ -44,10 +101,10 @@ class ProductionBatchController extends Controller
 
     public function create()
     {
-        $products  = Product::orderBy('name')->get();
+        $products = Product::orderBy('name')->get();
         $materials = Material::orderBy('name')->get();
-    
-    return view('batches.create', compact('products', 'materials'));
+
+        return view('batches.create', compact('products', 'materials'));
     }
 
     public function store(StoreBatchRequest $request)
