@@ -16,7 +16,7 @@
         <!-- Header Batch -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white fw-bold py-3">Header Batch</div>
+                <div class="card-header fw-bold py-3">Header Batch</div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Nomor Batch <span class="text-danger">*</span></label>
@@ -53,7 +53,7 @@
         <!-- Dynamic Row Penggunaan Bahan Baku -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <div class="card-header d-flex justify-content-between align-items-center py-3">
                     <div>
                         <span class="fw-bold">Rencana Penggunaan Bahan Baku</span>
                         <span id="bom-badge" class="badge bg-info-subtle text-info border ms-2 d-none">Resep BOM Terisi</span>

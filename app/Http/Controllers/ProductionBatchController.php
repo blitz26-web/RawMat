@@ -101,12 +101,14 @@ class ProductionBatchController extends Controller
     }
 
     public function create()
-    {
-        $products = Product::orderBy('name')->get();
-        $materials = Material::orderBy('name')->get();
+{
+    // Ambil semua data produk dan bahan baku dari database
+    $products = Product::all();
+    $materials = Material::all();
 
-        return view('batches.create', compact('products', 'materials'));
-    }
+    // Kirim variabel $products dan $materials ke view
+    return view('batches.create', compact('products', 'materials'));
+}
 
     public function store(StoreBatchRequest $request)
     {

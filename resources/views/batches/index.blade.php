@@ -194,7 +194,7 @@
 
         @if($batches->hasPages())
             <div class="card-footer bg-white border-top-0 py-3">
-                {{ $batches->links() }}
+                {{ $batches->links() }} 
             </div>
         @endif
     </div>
