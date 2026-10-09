@@ -1,249 +1,114 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - RawMat & Waste Control')
+@section('title', 'Dashboard Analitik')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="fw-bold m-0"><i class="bi bi-speedometer2 me-2"></i>Dashboard Analitik</h3>
-        <p class="text-muted small m-0">Ringkasan performa efisiensi produksi, limbah, dan kontrol stok bahan baku.</p>
-    </div>
-    <span class="badge bg-white text-dark border p-2 shadow-sm">
-        <i class="bi bi-calendar3 me-1"></i> {{ now()->translatedFormat('d F Y') }}
-    </span>
-</div>
+<div class="container-fluid px-4 py-4">
 
-<!-- 1. Metric Stat Cards -->
-<div class="row g-3 mb-4">
-    <!-- Card Stok Kritis -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-bold">STOK KRITIS</div>
-                        <div class="fs-3 fw-bold text-danger mt-1">{{ number_format($lowStockCount) }}</div>
-                    </div>
-                    <div class="bg-danger-subtle text-danger rounded-circle p-3">
-                        <i class="bi bi-exclamation-octagon fs-3"></i>
-                    </div>
-                </div>
-                <div class="mt-2 small text-muted">
-                    <span class="badge bg-danger text-white">Warning</span> Perlu restock supplier
-                </div>
+    {{-- Top Header Section --}}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-dark m-0 tracking-tight">Dashboard Analitik</h3>
+            <p class="text-muted small m-0 mt-1">Ringkasan performa efisiensi produksi, limbah, dan kontrol stok bahan baku.</p>
+        </div>
+        <div>
+            <div class="bg-white border border-slate-200 rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2 text-secondary small fw-semibold">
+                <i class="bi bi-calendar3 text-primary"></i>
+                <span>{{ \Carbon\Carbon::now()->format('d F Y') }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Card Rata-rata Yield Rate -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-bold">AVG YIELD RATE (BULAN INI)</div>
-                        <div class="fs-3 fw-bold text-success mt-1">{{ number_format($avgYieldRateMonth, 2) }}%</div>
-                    </div>
-                    <div class="bg-success-subtle text-success rounded-circle p-3">
-                        <i class="bi bi-graph-up-arrow fs-3"></i>
+    {{-- Metric Cards Grid dengan Tint Soft Color --}}
+    <div class="row g-3 mb-4">
+        
+        {{-- Card 1: Stok Kritis (Soft Red) --}}
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3" style="background: linear-gradient(135deg, #ffffff 0%, #fff1f2 100%); border: 1px solid #fecdd3 !important;">
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <span class="text-uppercase text-danger fs-7 fw-bold tracking-wider">Stok Kritis</span>
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center bg-danger text-white shadow-sm flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi bi-exclamation-triangle-fill fs-6"></i>
                     </div>
                 </div>
-                <div class="mt-2 small text-muted">
-                    Target Efisiensi: <strong>>= 95.00%</strong>
+                <div class="mb-2">
+                    <h2 class="fw-bold text-danger m-0 fs-1">{{ $criticalStockCount ?? 0 }}</h2>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-auto">
+                    <span class="badge bg-danger text-white rounded-pill px-2.5 py-1 fs-8 fw-semibold">Warning</span>
+                    <span class="text-muted small text-truncate">Perlu restock supplier</span>
                 </div>
             </div>
+        </div>
+
+        {{-- Card 2: AVG Yield Rate (Soft Green) --}}
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 1px solid #bbf7d0 !important;">
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <span class="text-uppercase text-success fs-7 fw-bold tracking-wider">Avg Yield Rate</span>
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center bg-success text-white shadow-sm flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi bi-graph-up-arrow fs-6"></i>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <h2 class="fw-bold text-success m-0 fs-1">{{ number_format($avgYieldRate ?? 0, 2) }}%</h2>
+                </div>
+                <div class="mt-auto">
+                    <span class="text-muted small">Target Efisiensi: <strong class="text-dark">&ge; 95.00%</strong></span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 3: Total Scrap (Soft Amber/Yellow) --}}
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border: 1px solid #fde68a !important;">
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <span class="text-uppercase text-warning fs-7 fw-bold tracking-wider">Total Scrap</span>
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center bg-warning text-dark shadow-sm flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi bi-trash3-fill fs-6"></i>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <h2 class="fw-bold text-warning-emphasis m-0 fs-1">{{ number_format($totalScrap ?? 0, 2) }}</h2>
+                </div>
+                <div class="mt-auto">
+                    <span class="text-muted small">Akumulasi limbah produksi</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 4: Batch Aktif (Soft Blue) --}}
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3" style="background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%); border: 1px solid #bae6fd !important;">
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <span class="text-uppercase text-primary fs-7 fw-bold tracking-wider">Batch Aktif</span>
+                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center bg-primary text-white shadow-sm flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi bi-arrow-repeat fs-6"></i>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <h2 class="fw-bold text-primary m-0 fs-1">{{ $activeBatchesCount ?? 0 }}</h2>
+                </div>
+                <div class="mt-auto">
+                    <span class="text-muted small">Dalam antrean / proses pabrik</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- Chart Section --}}
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white" style="border: 1px solid #e2e8f0 !important;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-bold text-dark m-0"><i class="bi bi-graph-up me-2 text-primary"></i>Tren Yield Rate (6 Bulan Terakhir)</h5>
+                <p class="text-muted small m-0 mt-1">Evaluasi tren persentase keberhasilan batch produksi.</p>
+            </div>
+        </div>
+        <div style="min-height: 280px;">
+            <canvas id="yieldChart"></canvas>
         </div>
     </div>
 
-    <!-- Card Total Limbah/Scrap -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-bold">TOTAL SCRAP (BULAN INI)</div>
-                        <div class="fs-3 fw-bold text-warning mt-1">{{ number_format($totalScrapQtyMonth, 2) }}</div>
-                    </div>
-                    <div class="bg-warning-subtle text-warning rounded-circle p-3">
-                        <i class="bi bi-trash3 fs-3"></i>
-                    </div>
-                </div>
-                <div class="mt-2 small text-muted">
-                    Akumulasi limbah produksi
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card Batch Aktif -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-muted small fw-bold">BATCH AKTIF / DRAFT</div>
-                        <div class="fs-3 fw-bold text-primary mt-1">{{ number_format($activeBatchesCount) }}</div>
-                    </div>
-                    <div class="bg-primary-subtle text-primary rounded-circle p-3">
-                        <i class="bi bi-arrow-repeat fs-3"></i>
-                    </div>
-                </div>
-                <div class="mt-2 small text-muted">
-                    Dalam antrean / proses pabrik
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 2. Section Charts (Chart.js) -->
-<div class="row g-4 mb-4">
-    <!-- Line Chart: Tren Yield Rate -->
-    <div class="col-lg-7">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white fw-bold py-3 border-0">
-                <i class="bi bi-activity me-1 text-primary"></i> Tren Yield Rate (6 Bulan Terakhir)
-            </div>
-            <div class="card-body">
-                <canvas id="yieldRateChart" style="max-height: 280px;"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bar Chart: Top Scrap Material -->
-    <div class="col-lg-5">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-header bg-white fw-bold py-3 border-0">
-                <i class="bi bi-bar-chart-fill me-1 text-warning"></i> Top 5 Bahan Baku Jadi Scrap (Bulan Ini)
-            </div>
-            <div class="card-body">
-                <canvas id="scrapMaterialChart" style="max-height: 280px;"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 3. Tabel Quick Action: Bahan Baku Kritis -->
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-0">
-        <span class="fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> Perhatian: Stok Bahan Baku Kritis (Low Stock)</span>
-        <a href="#" class="btn btn-sm btn-outline-secondary">Lihat Semua Material</a>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Kode</th>
-                        <th>Nama Bahan Baku</th>
-                        <th>Stok Saat Ini</th>
-                        <th>Safety Stock</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($criticalMaterials as $mat)
-                        <tr>
-                            <td><code>{{ $mat->code }}</code></td>
-                            <td class="fw-bold">{{ $mat->name }}</td>
-                            <td>
-                                <span class="text-danger fw-bold">
-                                    {{ number_format($mat->current_stock, 2) }} {{ $mat->unit }}
-                                </span>
-                            </td>
-                            <td>{{ number_format($mat->safety_stock, 2) }} {{ $mat->unit }}</td>
-                            <td>
-                                <span class="badge {{ $mat->stock_badge_class }}">
-                                    {{ $mat->stock_status_label }}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-danger shadow-sm">
-                                    <i class="bi bi-cart-plus me-1"></i> Order Stock (PO)
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">
-                                <i class="bi bi-shield-check text-success fs-4 d-block mb-1"></i>
-                                Semua stok bahan baku dalam kondisi aman di atas batas Safety Stock.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 @endsection
-
-@push('scripts')
-<!-- CDN Chart.js v4 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // --- 1. Line Chart: Tren Yield Rate ---
-        const yieldCtx = document.getElementById('yieldRateChart').getContext('2d');
-        new Chart(yieldCtx, {
-            type: 'line',
-            data: {
-                labels: @json($yieldChartLabels),
-                datasets: [{
-                    label: 'Yield Rate (%)',
-                    data: @json($yieldChartData),
-                    borderColor: '#198754',
-                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 50,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) { return value + '%'; }
-                        }
-                    }
-                }
-            }
-        });
-
-        // --- 2. Bar Chart: Top Scrap Material ---
-        const scrapCtx = document.getElementById('scrapMaterialChart').getContext('2d');
-        new Chart(scrapCtx, {
-            type: 'bar',
-            data: {
-                labels: @json($scrapChartLabels),
-                datasets: [{
-                    label: 'Total Scrap Qty',
-                    data: @json($scrapChartData),
-                    backgroundColor: '#ffc107',
-                    borderColor: '#ffc107',
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    });
-</script>
-@endpush

@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+
 class ProductionBatchController extends Controller
 {
     protected ProductionBatchService $batchService;
@@ -158,6 +159,32 @@ class ProductionBatchController extends Controller
                 ->with('success', "Batch #{$batch->batch_number} berhasil diselesaikan dan stok bahan baku telah dipotong.");
         } catch (Exception $e) {
             return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function destroy(ProductionBatch $batch)
+    {
+        try {
+            DB::transaction(function () use ($batch) {
+                // Jika batch yang dihapus berstatus 'completed', kembalikan stok bahan bakunya
+                if ($batch->status === 'completed') {
+                    foreach ($batch->materials as $item) {
+                        $material = Material::lockForUpdate()->find($item->material_id);
+                        if ($material) {
+                            // Tambahkan kembali stok yang pernah dipotong
+                            $material->increment('current_stock', $item->qty_planned);
+                        }
+                    }
+                }
+
+                // Hapus relasi pivot bahan baku & data batch
+                $batch->materials()->detach();
+                $batch->delete();
+            });
+
+            return redirect()->back()->with('success', 'Batch berhasil dihapus dan stok bahan baku telah dikembalikan otomatis!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menghapus batch: ' . $e->getMessage());
         }
     }
 }
