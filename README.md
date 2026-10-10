@@ -112,8 +112,8 @@ erDiagram
 
 1. **Clone Repositori**
    ```bash
-   git clone https://github.com/username/rawmat-control.git
-   cd rawmat-control
+   git clone https://github.com/blitz26-web/RawMat
+   cd RawMat
    ```
 
 2. **Install Depedensi Composer**
@@ -190,4 +190,4 @@ erDiagram
 
 ## 📝 Lisensi
 
-Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+Copyright (c) 2026 Muhammad Rivaldi Yusa. All Rights Reserved.
